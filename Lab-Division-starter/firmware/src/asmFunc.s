@@ -80,7 +80,7 @@ asmFunc:
     str r1,[r3]                 /* record the divisor input in memory */
     
     /* Clear all outputs, since they only get initialized once at program load */
-    mov r4,0                   /* r4 = running quotient; also a zero constant for clearing */
+    mov r4,#0                   /* r4 = running quotient; also a zero constant for clearing */
     ldr r5,=quotient            /* r5 = address of quotient (also returned to C in r0) */
     str r4,[r5]                 /* quotient = 0 in case we branch out on an error */
     ldr r6,=mod                 /* r6 = address of the mod (remainder) variable */
@@ -91,7 +91,9 @@ asmFunc:
     /* Input check: dividing by zero is an error, and a zero dividend is
      * also treated as an error by the lab spec */
     cmp r0,0                   /* is the dividend zero? */
+    beq error                   /* yes: invalid input, report the error */
     cmp r1,0                   /* is the divisor zero? */
+    beq error                   /* yes: cannot divide by zero, report the error */
     
     /* Division by repeated subtraction: subtract the divisor from the
      * remainder until what is left is smaller than the divisor. The number
@@ -113,7 +115,7 @@ div_done:
     b done                      /* skip the error handler */
     
 error:
-    mov r9,1                   /* r9 = 1, the "error" value */
+    mov r9,#1                   /* r9 = 1, the "error" value */
     str r9,[r7]                 /* set we_have_a_problem = 1 (quotient and mod stay 0) */
     mov r0,r5                   /* return the ADDRESS of quotient to the C code */
     b done                      /* leave the function */
